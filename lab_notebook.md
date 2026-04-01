@@ -33,6 +33,8 @@
 - Task 2: build the PyTorch Dataset class and data pipeline
 
 
+
+
 ## 2026-04-01 Morning
 
 ### What I did
@@ -61,3 +63,42 @@
 ### Next Task
 - Task 3: train ResNet18 from scratch
 
+## 2026-04-01 (continued — afternoon)
+
+### What I did
+- Completed Task 3: trained ResNet18 from scratch
+- Completed Task 4: trained ImageNet pretrained ResNet18 (frozen then unfrozen)
+- Completed Task 5: trained Zoobot ConvNeXT-Nano (frozen then unfrozen)
+- Saved all checkpoints to Google Drive
+
+### Results summary
+
+**ResNet18 scratch**
+- Converged to near-zero loss very quickly
+- Perfect predictions on val set — synthetic data too easy
+- Saved: resnet18_scratch.pth
+
+**ResNet18 ImageNet (frozen → unfrozen)**
+- Frozen phase: val loss stuck at 0.8519 every epoch — frozen ImageNet features completely useless for galaxy domain
+- Unfrozen phase: converged to near-zero after full fine-tuning
+- Saved: resnet18_imagenet.pth
+
+**Zoobot ConvNeXT-Nano (frozen → unfrozen)**
+- Frozen phase: smooth meaningful learning curve, 0.41 → 0.08 val loss over 30 epochs — frozen galaxy features are genuinely useful
+- Unfrozen phase: converged to near-zero rapidly, final val loss 0.0002
+- Saved: zoobot_frozen.pth, zoobot_unfrozen.pth
+
+### Key findings so far
+1. Synthetic data is too clean — all models eventually achieve near-perfect accuracy
+2. Frozen ImageNet features are useless for this domain (val loss never moved)
+3. Frozen Zoobot features are genuinely useful — model learned meaningfully without touching encoder weights
+4. This frozen phase difference is the clearest signal of domain-specific pretraining value so far
+5. Sim-to-real gap will be the real test — flagged for Task 8
+
+### Limitations noted
+- Synthetic lenstronomy data too uniform — no real galaxy negatives
+- Single channel grayscale — real surveys use 3-4 bands
+- Need real galaxy dataset for non-lens negatives (COSMOS, HSC PDR3)
+
+### Next
+- Task 6: evaluate all three models with AUC-ROC, TPR@FPR=0.01, precision-recall curves
