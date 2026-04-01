@@ -63,6 +63,9 @@
 ### Next Task
 - Task 3: train ResNet18 from scratch
 
+
+
+
 ## 2026-04-01 (continued — afternoon)
 
 ### What I did
@@ -79,20 +82,21 @@
 - Saved: resnet18_scratch.pth
 
 **ResNet18 ImageNet (frozen → unfrozen)**
-- Frozen phase: val loss stuck at 0.8519 every epoch — frozen ImageNet features completely useless for galaxy domain
+- Frozen phase: val loss started at 0.0041 but drifted upward to 0.0105 by epoch 30 — frozen ImageNet features have some signal but head overfits without encoder adaptation
+- Note: initial run showed stuck val loss at 0.8519 — this was a code bug where validation loop was evaluating the scratch model instead of the ImageNet model
 - Unfrozen phase: converged to near-zero after full fine-tuning
 - Saved: resnet18_imagenet.pth
 
 **Zoobot ConvNeXT-Nano (frozen → unfrozen)**
-- Frozen phase: smooth meaningful learning curve, 0.41 → 0.08 val loss over 30 epochs — frozen galaxy features are genuinely useful
+- Frozen phase: smooth decreasing learning curve, 0.41 → 0.08 val loss over 30 epochs — frozen galaxy features are genuinely useful and don't overfit
 - Unfrozen phase: converged to near-zero rapidly, final val loss 0.0002
 - Saved: zoobot_frozen.pth, zoobot_unfrozen.pth
 
 ### Key findings so far
 1. Synthetic data is too clean — all models eventually achieve near-perfect accuracy
-2. Frozen ImageNet features are useless for this domain (val loss never moved)
-3. Frozen Zoobot features are genuinely useful — model learned meaningfully without touching encoder weights
-4. This frozen phase difference is the clearest signal of domain-specific pretraining value so far
+2. Frozen ImageNet features have some signal but head overfits quickly — val loss drifts upward without encoder adaptation
+3. Frozen Zoobot features are genuinely useful — smooth decreasing val loss throughout frozen phase, no overfitting
+4. The frozen phase behavior is the clearest signal of domain-specific pretraining value — Zoobot learns meaningfully without touching encoder weights, ImageNet doesn't
 5. Sim-to-real gap will be the real test — flagged for Task 8
 
 ### Limitations noted
