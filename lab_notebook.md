@@ -31,3 +31,33 @@
 
 ### Tomorrow
 - Task 2: build the PyTorch Dataset class and data pipeline
+
+
+## 2026-04-01 Morning
+
+### What I did
+- Loaded synthetic dataset from Google Drive (20,000 images, 101x101)
+- Built LensDataset class inheriting from torch.utils.data.Dataset
+- Implemented arcsinh stretch + standardization preprocessing
+- Created 70/15/15 train/val/test split with fixed random seed (42)
+- Wrapped splits in DataLoaders (batch_size=32, shuffle=True for train only)
+
+### Results
+- Train: 14,000 samples, Val: 3,000, Test: 3,000
+- Pixel range after preprocessing: min=-1.66, max=8.06, mean=0.0017
+- Confirmed batch shape: (32, 101, 101)
+
+### Concepts learned
+- Dataset vs DataLoader and what each does
+- Map-style datasets and why we use them
+- Batching, shuffling, and iteration
+- Arcsinh stretch for astronomical dynamic range
+- Standardization (zero mean, unit variance) and why it helps training
+
+### Decisions made
+- a=0.1 for arcsinh scale factor (standard for astronomy)
+- seed=42 for reproducibility across all three model experiments
+
+### Next Task
+- Task 3: train ResNet18 from scratch
+
