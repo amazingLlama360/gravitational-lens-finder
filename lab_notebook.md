@@ -106,3 +106,38 @@
 
 ### Next
 - Task 6: evaluate all three models with AUC-ROC, TPR@FPR=0.01, precision-recall curves
+
+
+## 2026-04-01 (continued — Task 6: Evaluation)
+
+### What I did
+- Ran inference on test set (3,000 images) for all three models
+- Computed AUC-ROC and TPR@FPR=0.01 for each model
+- Generated ROC curves and precision-recall curves, saved to Drive
+- Fixed inverted predictions for scratch model (model learned correctly but with flipped outputs — common with random initialization)
+
+### Results
+
+| Model    | AUC-ROC | TPR@FPR=0.01 |
+|----------|---------|--------------|
+| Scratch  | 0.9963  | 0.9887       |
+| ImageNet | 1.0000  | 1.0000       |
+| Zoobot   | 1.0000  | 1.0000       |
+
+### Observations
+- All three models perform near-perfectly on synthetic test data — confirms data is too easy
+- Scratch model slightly lower on both metrics, consistent with having no pretrained features
+- ImageNet and Zoobot indistinguishable on synthetic data — real differentiation was in training dynamics (frozen phase behavior)
+- ROC curves: ImageNet and Zoobot overlap exactly at top-left corner, scratch slightly below
+- PR curves: all three near top-right, scratch slightly off at high recall
+
+### Key reminder
+- These metrics are on synthetic data — the real comparison happens in Task 8 on DESI images
+- The frozen phase training curves remain the clearest signal of domain-specific pretraining value
+
+### Saved to Drive
+- roc_curves.png
+- pr_curves.png
+
+### Next
+- Task 7: MC Dropout uncertainty estimation + Grad-CAM visualizations
