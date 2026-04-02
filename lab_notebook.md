@@ -203,3 +203,63 @@ The sim-to-real gap is severe and quantified:
 ### Status
 Not done — pursuing model improvements to reduce false positive rate and find real lens candidates. Ahead of schedule, continuing work.
 
+
+
+
+
+## 2026-04-02 (Full day — Tasks 8.1 through 8.4)
+
+### Task 8.1: Threshold calibration
+- Applied 99th percentile threshold to original synthetic-trained model
+- Top 10 candidates identified, none within 10 arcsec of known lenses in lenscat
+- Visually inspected all 10 in Legacy Survey viewer
+- One candidate (ra=150.5326, dec=2.3808) showed possible arc in residual image — graded C
+- Confirmed what a real Einstein ring looks like: DESI-015.6763-14.0150 as reference
+
+### Task 8.2 + 8.4 Combined: Real data retraining
+- Downloaded 481 confirmed/candidate lens cutouts from lenscat catalog via DESI API
+- Combined with 1,000 real DESI elliptical galaxy cutouts as non-lenses
+- Built RealLensDataset class: loads 3-channel FITS files on the fly, arcsinh + normalize
+- Trained on Kaggle T4 GPU (Colab compute units exhausted)
+- Head-only training: 100 epochs, val loss 2.19 → 0.175, still improving
+- Saved best checkpoint throughout training
+
+### Test set evaluation (222 held-out images — honest result)
+| Metric | Synthetic model | Real-data model |
+|--------|----------------|-----------------|
+| AUC-ROC | 1.000 (trivial) | 0.9638 |
+| False positive rate | 65.7% on real data | 2.7% on test set |
+| Precision (lens) | N/A | 94% |
+| Recall (lens) | N/A | 88% |
+| Accuracy | N/A | 94% |
+
+Confusion matrix:
+- 146/150 non-lenses correctly rejected (4 false alarms)
+- 63/72 lenses correctly found (9 missed)
+
+### Key finding
+Training on real data reduced false positive rate by ~24x compared to synthetic training.
+This directly quantifies the sim-to-real gap and demonstrates the value of real training data.
+
+### Survey search attempts
+- NOIRLab Astro Data Lab query timing out intermittently (works on Colab, not Kaggle)
+- Random grid cutouts invalid for inference — model expects galaxy-centered images
+- Test set remains the honest evaluation for now
+- Will retry NOIRLab query tonight for fresh targeted galaxy coordinates
+
+### Compute notes
+- Exhausted Colab Pro compute units during training — purchased additional units
+- Kaggle T4 used for actual training run
+- NOIRLab queries: work on Colab, consistently timeout on Kaggle
+
+### Saved files
+- zoobot_real_trained.pth (Google Drive + Kaggle output)
+- test_set_results.csv
+
+### Next
+- Tonight: retry NOIRLab query, download fresh galaxy cutouts, run survey search
+- Find real lens candidates with the improved model
+- Begin Task 9 writeup
+
+
+
