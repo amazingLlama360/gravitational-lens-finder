@@ -108,6 +108,9 @@
 - Task 6: evaluate all three models with AUC-ROC, TPR@FPR=0.01, precision-recall curves
 
 
+
+
+
 ## 2026-04-01 (continued — Task 6: Evaluation)
 
 ### What I did
@@ -141,3 +144,33 @@
 
 ### Next
 - Task 7: MC Dropout uncertainty estimation + Grad-CAM visualizations
+
+
+
+## 2026-04-01 (continued — Task 7: MC Dropout + Grad-CAM)
+
+### What I did
+- Rebuilt Zoobot with dropout head (p=0.5) for uncertainty estimation
+- Trained head-only for 15 epochs — smooth convergence from 0.45 to 0.12 val loss
+- Implemented MC Dropout inference: 50 forward passes per image, mean = prediction, std = uncertainty
+- Generated Grad-CAM heatmaps for lens and non-lens images
+- Saved: zoobot_mc_dropout.pth, mc_dropout_viz.png, gradcam.png, gradcam_comparison.png
+
+### MC Dropout results
+- High confidence lens (idx 1): pred=0.98, uncertainty=0.011
+- Low confidence lens (idx 0): pred=0.81, uncertainty=0.087
+- Ambiguous non-lens (idx 10000): pred=0.28, uncertainty=0.103 — highest uncertainty of all
+- Confident non-lens (idx 10002): pred=0.0002, uncertainty=0.0002
+- Uncertainty correctly tracks confidence — ambiguous cases have higher std
+
+### Grad-CAM results
+- Lens heatmap: red/yellow concentrated in ring around center — model correctly focuses on arc regions, not central galaxy
+- Non-lens heatmap: scattered red on periphery, no coherent ring structure — model finds nothing lens-like
+- This confirms the model learned physically meaningful features, not just brightness patterns
+- Contrast between lens/non-lens heatmaps is visually compelling and publishable
+
+### Next
+- Task 8: DESI Legacy Survey search — run model on real sky data and find new lens candidates
+
+
+
