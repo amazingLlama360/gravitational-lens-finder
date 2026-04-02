@@ -174,3 +174,32 @@
 
 
 
+## 2026-04-01 (continued — Task 8: DESI Survey Search)
+
+### What I did
+- Queried NOIRLab Astro Data Lab for 1,000 massive elliptical galaxies (DEV/SER type, flux_r > 50) in RA 150-200, Dec 0-30
+- Downloaded 1,000 FITS cutouts from DESI Legacy Survey DR10 (101x101px, grz bands)
+- Ran Zoobot MC Dropout model on all 1,000 cutouts
+- Visually inspected top candidates in Legacy Survey viewer
+- Cross-referenced against confirmed DESI Einstein ring DESI-015.6763-14.0150 as visual reference
+
+### Results
+- p > 0.9: 657/1000 galaxies flagged (expected: ~1)
+- p > 0.5: 809/1000 galaxies flagged
+- p < 0.1: 89/1000 galaxies
+- Top candidates visually inspected — none showed clear Einstein ring features
+- Confirmed sim-to-real gap: model trained on clean simulations is wildly overconfident on real noisy data
+
+### Key finding
+The sim-to-real gap is severe and quantified:
+- Synthetic test AUC: 1.000
+- Real deployment false positive rate: ~65.7% vs expected ~0.1%
+- This is a ~657x inflation of the expected positive rate
+
+### Saved to Drive
+- desi_candidates.csv
+- desi_score_distribution.png
+
+### Status
+Not done — pursuing model improvements to reduce false positive rate and find real lens candidates. Ahead of schedule, continuing work.
+
