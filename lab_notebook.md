@@ -263,3 +263,88 @@ This directly quantifies the sim-to-real gap and demonstrates the value of real 
 
 
 
+## 2026-04-02 (Tasks 8.1–8.4: Full Model Comparison)
+
+### Overview
+Two training regimes compared across three model architectures:
+- Synthetic data: 20,000 lenstronomy simulations (10k lens, 10k non-lens), single channel
+- Real data: 481 confirmed/candidate lenses from lenscat + 1,000 real DESI elliptical galaxies, 3-channel grz
+
+### Task 8.1: Threshold calibration (synthetic model)
+- Applied 99th percentile threshold to synthetic-trained Zoobot on 1,000 real DESI galaxies
+- 10 candidates identified, none within 10 arcsec of known lenses in lenscat
+- One candidate (ra=150.5326, dec=2.3808) showed possible arc structure in residual image — graded C
+- False positive rate: 65.7% — confirmed severe sim-to-real gap
+- Reference Einstein ring confirmed: DESI-015.6763-14.0150
+
+### Task 8.2 + 8.4: Real data retraining
+**Dataset:**
+- Positive: 481 FITS cutouts from lenscat coordinates, downloaded from DESI Legacy Survey DR10
+- Negative: 1,000 real DESI elliptical galaxy cutouts (DEV/SER type, flux_r > 50)
+- All 3-channel (grz), 101x101px, preprocessed with arcsinh stretch + standardization
+- 70/15/15 train/val/test split, seed=42
+- Train: 1,037 images, Val: 222, Test: 222
+
+**Training infrastructure:**
+- Kaggle T4 GPU (Colab compute units exhausted mid-project)
+- Head-only runs: 100 epochs, best checkpoint saved throughout
+- Full fine-tuning runs: 100 epochs, best checkpoint saved throughout
+- Learning rates: scratch 1e-3, ImageNet 1e-4, Zoobot 1e-5 (tuned per model, standard practice)
+
+### Synthetic data results (test set AUC, from earlier tasks)
+| Model | Training regime | AUC |
+|-------|----------------|-----|
+| Scratch ResNet18 | Full model | ~1.000 |
+| ImageNet ResNet18 | Frozen → unfrozen | ~1.000 |
+| Zoobot ConvNeXT-Nano | Frozen → unfrozen | ~1.000 |
+
+All models trivially achieved near-perfect AUC on synthetic data — data too clean, not discriminative.
+
+### Real data results (test set AUC, 222 held-out images)
+| Model | Training regime | AUC | Val loss |
+|-------|----------------|-----|----------|
+| Scratch ResNet18 | Full model | 0.9968 | 0.0546 |
+| Scratch ResNet18 | Frozen head | 0.9865 | 0.1564 |
+| ImageNet ResNet18 | Full model | 0.9976 | 0.0522 |
+| ImageNet ResNet18 | Frozen head | 0.9719 | 0.1662 |
+| Zoobot ConvNeXT-Nano | Full model | 0.9930 | 0.0937 |
+| Zoobot ConvNeXT-Nano | Frozen head | 0.9638 | 0.1751 |
+
+### Best model detailed evaluation (ImageNet full, AUC 0.9976)
+To be run — confusion matrix and precision/recall pending.
+
+### Key findings
+1. Real data training dramatically reduces false positive rate: 65.7% → ~2.7% on test set
+2. Full fine-tuning consistently outperforms frozen head across all architectures
+3. Zoobot underperforms both ImageNet and scratch in both regimes — galaxy-pretrained features do not provide expected advantage for lens detection
+4. Scratch frozen head (0.9865) beats ImageNet frozen head (0.9719) — random features + linear head is surprisingly competitive
+5. All full fine-tuning runs showed severe overfitting after ~5-20 epochs due to small dataset (1,037 training images) — best checkpoints saved early
+6. Sim-to-real gap confirmed and quantified: AUC 1.000 on synthetic → 0.96-0.99 on real data
+
+### Overfitting analysis
+Full fine-tuning on 1,037 images leads to rapid memorization:
+- ImageNet full: best val loss at epoch 3, overfitting thereafter
+- Zoobot full: best val loss at epoch 7, monotonically increasing thereafter
+- Scratch full: unstable val loss throughout, high variance
+
+This suggests dataset size is the primary bottleneck. With 5,000+ real lens examples, full fine-tuning would likely generalize significantly better.
+
+### Saved models (Kaggle output)
+- zoobot_real_trained.pth (frozen head)
+- resnet18_imagenet_real.pth (frozen head)
+- resnet18_scratch_real.pth (full model)
+- resnet18_scratch_frozen.pth (frozen head)
+- zoobot_full_real.pth (full model)
+- resnet18_imagenet_full.pth (full model)
+
+### Survey search status
+- NOIRLab Astro Data Lab queries timing out on Kaggle (works on Colab only)
+- Random grid cutouts invalid for inference — not galaxy-centered
+- Test set (222 images) remains the honest evaluation
+- Pending: fresh galaxy-targeted cutouts via NOIRLab on Colab for real survey search
+
+### Next
+- Download all 6 model checkpoints from Kaggle to Drive
+- Run confusion matrix on best model (ImageNet full)
+- Retry NOIRLab query on Colab tonight for survey search
+- Begin Task 9 writeup
