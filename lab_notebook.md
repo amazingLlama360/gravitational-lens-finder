@@ -348,3 +348,57 @@ This suggests dataset size is the primary bottleneck. With 5,000+ real lens exam
 - Run confusion matrix on best model (ImageNet full)
 - Retry NOIRLab query on Colab tonight for survey search
 - Begin Task 9 writeup
+
+
+## 2026-04-03 (Task 8 continued — Hard Negative Mining + Survey Search)
+
+### NOIRLab query fix
+- Discovered that `brick_primary = 1` is required for fast queries — without it the database scans 3 billion rows and times out
+- Successfully queried RA 100-150, Dec 0-30 for 1,000 fresh elliptical galaxies (never seen during training)
+- Downloaded 956 DESI cutouts (101x101px, grz) to desi_fresh_cutouts/
+
+### Initial inference on fresh galaxies (pre-hard-negatives)
+| Model | p > 0.9 | p > 0.5 | p < 0.1 |
+|-------|---------|---------|---------|
+| ImageNet full | 312 | 573 | 149 |
+| Zoobot frozen | 22 | 235 | 430 |
+
+- Visual inspection of top candidates: all false positives
+- Main contaminant: DESI pipeline image artifacts (rectangular border patterns)
+- Cross-matched against lenscat: 0 known lenses in this sky region
+- Confirmed: false positive rate still too high for reliable visual inspection
+
+### Hard negative mining (Task 8.1 improvement)
+- Took 312 highest-scoring false positives from ImageNet model as hard negatives
+- Added to training set: 481 lenses + 1,000 non-lenses + 312 hard negatives = 1,793 total
+- Retrained ImageNet full model on Kaggle T4 GPU, 100 epochs
+- Best val loss: 0.1443 at epoch 3
+- Test AUC: 0.9802 (slight drop from 0.9976 — expected, test set now harder)
+
+### Inference after hard negative mining
+| Model | p > 0.9 | p > 0.5 | p < 0.1 |
+|-------|---------|---------|---------|
+| ImageNet + hard negs | 4 | 26 | 826 |
+
+- False positive rate dropped from 60% to 2.7% — dramatic improvement
+- Only 4 candidates above 0.9 threshold
+- Visual inspection of top 4: none show clear Einstein ring features
+- Expected yield in 956 galaxies: ~0.1 real lenses — need larger search area
+
+### Saved files
+- resnet18_imagenet_hardneg.pth (Kaggle output + Drive)
+- fresh_survey_results_imagenet.csv
+- fresh_survey_results_zoobot.csv
+- hard_negatives.csv (312 coordinates)
+
+### Pending
+- [ ] Retrain Zoobot with hard negatives (same 312 hard negatives, same procedure)
+- [ ] Download 10,000 galaxy cutouts overnight on PC (large_survey_coords.csv saved to Drive)
+- [ ] Run inference on 10,000 galaxies with hard-neg-trained model
+- [ ] Visual inspection of top candidates from large survey
+- [ ] Ensemble scoring across all models
+
+### Next session
+- Start Zoobot hard negative retraining on Kaggle
+- Start overnight PC download
+- When download completes: upload to Kaggle, run inference, inspect top candidates
