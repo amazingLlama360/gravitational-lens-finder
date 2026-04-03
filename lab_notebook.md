@@ -402,3 +402,56 @@ This suggests dataset size is the primary bottleneck. With 5,000+ real lens exam
 - Start Zoobot hard negative retraining on Kaggle
 - Start overnight PC download
 - When download completes: upload to Kaggle, run inference, inspect top candidates
+
+
+## 2026-04-03 (Task 8 continued — Large Survey Search)
+
+### Large survey setup
+- Queried NOIRLab for 10,000 massive elliptical galaxies, RA 100-150, Dec 0-30
+- Downloaded 9,999 DESI cutouts (101x101px, grz) to desi_large_survey/ on Drive
+- Key fix: brick_primary = 1 required for fast NOIRLab queries
+
+### Inference results on 9,999 galaxies
+
+| Model | p > 0.9 | p > 0.5 | p < 0.1 |
+|-------|---------|---------|---------|
+| ImageNet + hard negatives | 82 | 406 | 7,993 |
+| Zoobot frozen + hard negatives | 7 | 318 | 5,863 |
+| Ensemble (both > 0.9) | 4 | — | — |
+
+### Known lens recovery
+- ImageNet model correctly identified DESI-113.7119+17.2044 (lenscat grade: probable)
+- Separation: 0.10 arcsec — essentially exact match
+- Model score: p=0.9105
+- This validates the model is detecting real lensing signatures
+
+### New ensemble candidates (both models p > 0.9, not in lenscat)
+| RA | Dec | ImageNet | Zoobot | Ensemble |
+|----|-----|----------|--------|----------|
+| 115.7005 | 9.3649 | 0.9931 | 0.9618 | 0.9775 |
+| 110.2707 | 23.2891 | 1.0000 | 0.9405 | 0.9702 |
+| 115.8200 | 22.5305 | 1.0000 | 0.9203 | 0.9602 |
+| 116.3199 | 8.8465 | 0.9565 | 0.9023 | 0.9294 |
+
+### Visual inspection grades
+- ra=115.7005, dec=9.3649 — Grade C. Pink smudge offset left, disappears in residual
+- ra=110.2707, dec=23.2891 — Grade C. Faint smudge in cluster environment, residual clean
+- ra=115.8200, dec=22.5305 — Grade D. No arc features, galaxy group
+- ra=116.3199, dec=8.8465 — Grade C. Slight color asymmetry, no residual ring
+
+### Summary
+- No definitive new Einstein ring identified on visual inspection
+- Known lens successfully recovered — confirms model is functional
+- False positive rate at ensemble level: 0.04% (4/9,999) — near the expected real lens rate
+- Main remaining challenge: visual confirmation at DESI ground-based resolution is difficult for subtle lenses
+
+### Saved files
+- large_survey_imagenet_hardneg.csv
+- large_survey_zoobot_hardneg.csv  
+- large_survey_ensemble.csv
+- new_lens_candidates.csv
+
+### Next
+- Begin Task 9: writeup
+- Consider submitting Grade C candidates to a citizen science platform for second opinions
+- Future work: search larger sky area, add more hard negatives, higher resolution follow-up
